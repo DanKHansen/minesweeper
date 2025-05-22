@@ -1,15 +1,13 @@
 object Minesweeper:
-   def annotate(grid: List[String]): List[String] =
-      if grid.isEmpty || grid.head.isEmpty then return grid
-      val adj = Seq((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
-      grid.zipWithIndex.map { case (r, idxR) =>
-         r.zipWithIndex.map { case (c, idxC) =>
-            if c == '*' then c
-            else
-               adj.map { (dx, dy) => (idxR + dx, idxC + dy) }
-                  .filter { case (x, y) => grid.indices.contains(x) && grid.head.indices.contains(y) }
-                  .count { case (i, j) => grid(i)(j) == '*' }
-                  .toString
-                  .replace('0', ' ')
-         }.mkString
-      }
+   def annotate(l: List[String]): List[String] =
+      l.indices.map(r =>
+            l(r).indices.map(c =>
+                  if l(r)(c) == '*' then '*'
+                  else
+                     val n = (-1 to 1).flatMap(dx => (-1 to 1).map(dy => (r + dx, c + dy))).count { case (x, y) =>
+                        (x != r || y != c) && l.indices.contains(x) && l.head.indices.contains(y) && l(x)(
+                          y) == '*'
+                     }
+                     if n == 0 then ' ' else n.toString.head)
+               .mkString)
+         .toList
