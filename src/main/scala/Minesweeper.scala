@@ -1,26 +1,15 @@
-import scala.util.{Success, Try}
-
 object Minesweeper:
    def annotate(grid: List[String]): List[String] =
       if grid.isEmpty || grid.head.isEmpty then return grid
-      def check(c: (Int, Int)): String =
-         val amount = List(
-           Try(grid(c._1 - 1)(c._2 - 1)),
-           Try(grid(c._1 - 1)(c._2)),
-           Try(grid(c._1 - 1)(c._2 + 1)),
-           Try(grid(c._1)(c._2 - 1)),
-           Try(grid(c._1)(c._2 + 1)),
-           Try(grid(c._1 + 1)(c._2 - 1)),
-           Try(grid(c._1 + 1)(c._2)),
-           Try(grid(c._1 + 1)(c._2 + 1))
-         ).count(_ == Success('*'))
-         if amount > 0 then amount.toString else " "
-
-      val cells = for
-         row <- grid.indices
-         col <- grid.head.indices
-         cell = (row, col)
-      yield cell
-      val r = cells.map(cell => if grid(cell._1)(cell._2) == '*' then "*" else check(cell))
-      if grid.head.length > 1 then r.mkString.sliding(grid.head.length, grid.size).toList
-      else r.toList
+      val adj = Seq((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+      grid.zipWithIndex.map { case (r, idxR) =>
+         r.zipWithIndex.map { case (c, idxC) =>
+            if c == '*' then c
+            else
+               adj.map { (dx, dy) => (idxR + dx, idxC + dy) }
+                  .filter { case (x, y) => grid.indices.contains(x) && grid.head.indices.contains(y) }
+                  .count { case (i, j) => grid(i)(j) == '*' }
+                  .toString
+                  .replace('0', ' ')
+         }.mkString
+      }
